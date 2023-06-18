@@ -1,7 +1,10 @@
 import pygame
 
 from game.utils.constants import BG, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS, DEFAULT_TYPE
+#Game tiene un spaceship (una instancia de una clse Spaceship)
 
+#Game puede decirle al spaceship que se actualize llamando al metodo update(), update espera una lista que contiene
+#los eventos del teclado que pudieron haber ocurrido
 
 class Game:
     def __init__(self):
