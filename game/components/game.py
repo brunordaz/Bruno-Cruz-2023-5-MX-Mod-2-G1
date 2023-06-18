@@ -6,7 +6,6 @@ from game.components.spaceship import Spaceship
 
 #Game puede decirle al spaceship que se actualize llamando al metodo update(), update espera una lista que contiene
 #los eventos del teclado que pudieron haber ocurrido
-
 class Game:
     def __init__(self):
         pygame.init()
@@ -18,6 +17,7 @@ class Game:
         self.game_speed = 10 # el numero de pixeles que el "objeto / imagen" se mueve en patalla
         self.x_pos_bg = 0
         self.y_pos_bg = 0
+        self.spaceship = Spaceship()
 
     def run(self):
         # Game loop: events - update - draw
