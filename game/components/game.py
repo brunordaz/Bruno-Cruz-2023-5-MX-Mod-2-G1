@@ -38,12 +38,19 @@ class Game:
                 self.playing = False
 
     def update(self):
-        pass # pass equivale a hacer nada 
+        #el update llama al update de los objetos de algunos de los objetos de mi juego
+        #pass # pass equivale a hacer nada 
+        events = pygame.key.get_pressed() #contiene todos los eventos del teclado que pudieron ocurrir en un gameloop
+        self.spaceship.update(events)
 
     def draw(self):
         self.clock.tick(FPS) # configuro cuantos frames per second voy a dibujar
         self.screen.fill((255, 255, 255)) # lleno el screen de color BLANCO???? 255, 255, 255 es el codigo RGB
+        #yo "Game" se dibujar mi escenario
         self.draw_background()
+        #yo "Game" le ordeno al spaceship dibujarse llamando a un metodo draw del Spaceship
+        #el metodo draw espera que le pase el screen
+        self.spaceship.draw(self.screen)
         pygame.display.update() # esto hace que el dibujo se actualice en el display de pygame
         pygame.display.flip()  # hace el cambio
 
