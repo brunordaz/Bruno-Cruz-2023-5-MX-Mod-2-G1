@@ -1,116 +1,55 @@
 import pygame, random
-
 from pygame.sprite import Sprite
-
-from game.utils.constants import ENEMY_1, ENEMY_2, SCREEN_HEIGHT, SCREEN_WIDTH
+from game.utils.constants import ENEMY_1, ENEMY_2, SCREEN_HEIGHT, SCREEN_WIDTH, BULLET_ENEMY
 
 class Enemy(Sprite):
-    def __init__(self, type):
-        self.type = type
-        self.width = 40
-        self.height = 50
-        self.images = random.choice[ENEMY_1, ENEMY_2]
-        self.image = pygame.transform.scale(self.image, (self.width, self.height))
+    def __init__(self):
+        self.images = [ENEMY_1, ENEMY_2]
+        self.image = pygame.transform.scale(random.choice(self.images), (50, 60))
         self.rect = self.image.get_rect()
-        self.rect.x = random.randint(0, SCREEN_WIDTH-self.width)
-        self.rect.y = 0
-        self.speed = 10
-    
-    def draw (self, screen):
+        self.rect.x = random.randint(0, SCREEN_WIDTH - self.rect.width)
+        self.rect.y = random.randint(-self.rect.height, -10)
+        self.speed_x = random.randint(-9, 9)
+        self.speed_y = random.randint(8, 15)
+        self.bullets = pygame.sprite.Group()
+
+    def draw(self, screen):
         screen.blit(self.image, (self.rect.x, self.rect.y))
-
-    def create_enemy(self):
-        current_time = pygame.time.get_ticks()
-        time_delay = random.randint(1000, 2000)
-
-        if current_time - self.enemy_creation_time > time_delay:
-            x_pos = random.randint(0, SCREEN_WIDTH - self.image_width)
-            selected_image = random.choice(self.enemy_images)
-            enemy_image = pygame.transform.scale(selected_image, (self.image_width, self.image_height))
-            enemy = {
-                'image': enemy_image,
-                'rect': self.rect.copy(),
-                'move_direction': random.choice(["left", "right"])
-            }
-            enemy['rect'].topleft = (x_pos, -self.image_height)
-            self.enemies.append(enemy)
-            self.timer = current_time
-
+        self.bullets.draw(screen)
 
     def update(self):
-        direction_change_delay = random.randint (500, 1000)
-        for enemy in self.enemies:
-            enemy['rect'].y += self.game_speed
-            self.update_enemy_position(enemy)
+        self.rect.x += self.speed_x
+        self.rect.y += self.speed_y
 
-            if enemy['rect'].top > SCREEN_HEIGHT:
-                self.enemies.remove(enemy)
-            else:
-                current_time = pygame.time.get_ticks()
+        if self.rect.y > SCREEN_HEIGHT:
+            self.rect.x = random.randint(0, SCREEN_WIDTH - self.rect.width)
+            self.rect.y = random.randint(-self.rect.height, -10)
+            self.speed_x = random.randint(-9, 9)
+            self.speed_y = random.randint(8, 15)
+            self.image = pygame.transform.scale(random.choice(self.images), (50, 60))
 
-                if current_time - self.direction_change_timer > self.direction_change_delay:
-                    new_direction = random.choice(["left", "right"])
-                    if new_direction != enemy['move_direction']:
-                        enemy['move_direction'] = new_direction
-                    else:
-                        enemy['move_direction'] = "left" if enemy['move_direction'] == "right" else "right"
-
-                    self.direction_timer = current_time
+        if self.rect.right > SCREEN_WIDTH:
+            self.speed_x = -random.randint(1, 9)
+        elif self.rect.left < 0:
+            self.speed_x = random.randint(1, 9)
 
 
-    def update_enemy_position(self, enemy):
-        if enemy['move_direction'] == "left":
-            enemy['rect'].x -= self.game_speed
-            if enemy['rect'].left < 0:
-                enemy['move_direction'] = "right"
-        elif enemy['move_direction'] == "right":
-            enemy['rect'].x += self.game_speed
-            if enemy['rect'].right > SCREEN_WIDTH:
-                enemy['move_direction'] = "left"
+        self.bullets.update()
 
-    def draw(self, screen):
-        for enemy in self.enemies:
-            screen.blit(enemy['image'], enemy['rect'])
+    def fire_bullet(self):
+        bullet = BulletEnemy(self.rect.centerx, self.rect.bottom)
+        self.bullets.add(bullet)
 
-    def reset(self):
-        x_pos = random.randint(0, SCREEN_WIDTH - self.image_width)
-        y_pos = random.randint(-2 * self.image_height, -self.image_height)
-        self.rect.topleft = (x_pos, y_pos)
-        self.move_direction = random.choice(["left", "right"]) # Reiniciar el temporizador
+class BulletEnemy(Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pygame.transform.scale(BULLET_ENEMY, (15, 15))
+        self.rect = self.image.get_rect()
+        self.rect.centerx = x
+        self.rect.centery = y
+        self.speed_y = 16
 
     def update(self):
-        for enemy in self.enemies:
-            enemy['rect'].y += self.game_speed
-
-            if enemy['rect'].top > SCREEN_HEIGHT:
-                self.enemies.remove(enemy)
-            else:
-                current_time = pygame.time.get_ticks()
-
-                if current_time - self.direction_timer > self.direction_change_delay:
-                    new_direction = random.choice(["left", "right"])
-                    if new_direction != enemy['move_direction']:
-                        enemy['move_direction'] = new_direction
-                    else:
-                        enemy['move_direction'] = "left" if enemy['move_direction'] == "right" else "right"
-
-                    self.direction_timer = current_time
-
-                if enemy['move_direction'] == "left":
-                    enemy['rect'].x -= self.game_speed
-                    if enemy['rect'].left < 0:
-                        enemy['move_direction'] = "right"
-                elif enemy['move_direction'] == "right":
-                    enemy['rect'].x += self.game_speed
-                    if enemy['rect'].right > SCREEN_WIDTH:
-                        enemy['move_direction'] = "left"
-
-    def draw(self, screen):
-        for enemy in self.enemies:
-            screen.blit(enemy['image'], enemy['rect'])
-
-    def reset(self):
-        x_pos = random.randint(0, SCREEN_WIDTH - self.image_width)
-        y_pos = random.randint(-2 * self.image_height, -self.image_height)
-        self.rect.topleft = (x_pos, y_pos)
-        self.move_direction = random.choice(["left", "right"])
+        self.rect.y += self.speed_y
+        if self.rect.bottom < 0:
+            self.kill()
