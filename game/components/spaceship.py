@@ -1,11 +1,12 @@
 import pygame
+
 from pygame.sprite import Sprite
 from game.utils.constants import SPACESHIP, SCREEN_WIDTH, SCREEN_HEIGHT, BULLET
 
 class Bullet(Sprite):
     def __init__(self, position):
         super().__init__()
-        self.image = pygame.transform.scale(BULLET, (20, 20))
+        self.image = pygame.transform.scale(BULLET, (30, 30))
         self.rect = self.image.get_rect()
         self.rect.x = position[0]
         self.rect.y = position[1]
@@ -18,7 +19,7 @@ class Spaceship(Sprite):
         self.image = SPACESHIP
         self.image = pygame.transform.scale(self.image, (50, 60))
         self.rect = self.image.get_rect()
-        self.speed = 8
+        self.speed = 9
         self.rect.x = (SCREEN_WIDTH - self.rect.width) // 2
         self.rect.y = SCREEN_HEIGHT - self.rect.height
         self.bullets = []
