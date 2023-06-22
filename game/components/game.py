@@ -1,8 +1,8 @@
 import pygame
 
 from random import randint
-from game.utils.constants import BG, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS, DEFAULT_TYPE,SOUND,FONT_STYLE
-from game.spaceship import spaceship
+from game.utils.constants import BG, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS, DEFAULT_TYPE,FONT_STYLE
+from game.components.spaceship import spaceship
 
 from game.enemy import enemy
 
@@ -24,7 +24,6 @@ class Game:
         for _ in range(5):
             enemy = enemy()
             self.enemies.append(enemy)
-        self.sounds = SOUND
         self.game_over_screen = GameOver(self.restart_game)
         self.score = 0
         self.deaths = 0
@@ -39,7 +38,7 @@ class Game:
             self.update()
             self.draw()
         else:
-            print("Something ocurred to quit the game!\nBYE BYE!")
+            print("Something ocurred to quit the game!")
         pygame.display.quit()
         pygame.quit()
 
