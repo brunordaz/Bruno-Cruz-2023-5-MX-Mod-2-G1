@@ -4,6 +4,7 @@ from game.utils.constants import ENEMY_1, ENEMY_2, SCREEN_HEIGHT, SCREEN_WIDTH, 
 
 class Enemy(Sprite):
     def __init__(self):
+        super().__init__()
         self.images = [ENEMY_1, ENEMY_2]
         self.image = pygame.transform.scale(random.choice(self.images), (50, 60))
         self.rect = self.image.get_rect()
@@ -21,20 +22,22 @@ class Enemy(Sprite):
         self.rect.x += self.speed_x
         self.rect.y += self.speed_y
 
+        # Verificar si el enemigo ha salido de la pantalla
         if self.rect.y > SCREEN_HEIGHT:
-            self.rect.x = random.randint(0, SCREEN_WIDTH - self.rect.width)
-            self.rect.y = random.randint(-self.rect.height, -10)
-            self.speed_x = random.randint(-9, 9)
-            self.speed_y = random.randint(8, 15)
-            self.image = pygame.transform.scale(random.choice(self.images), (50, 60))
-
-        if self.rect.right > SCREEN_WIDTH:
-            self.speed_x = -random.randint(1, 9)
-        elif self.rect.left < 0:
-            self.speed_x = random.randint(1, 9)
-
-
+            self.reset_position()
+        if self.rect.right > SCREEN_WIDTH or self.rect.left < 0:
+            self.change_direction()
         self.bullets.update()
+
+    def reset_position(self):
+        self.rect.x = random.randint(0, SCREEN_WIDTH - self.rect.width)
+        self.rect.y = random.randint(-self.rect.height, -10)
+        self.speed_x = random.randint(-9, 9)
+        self.speed_y = random.randint(9, 29)
+        self.image = pygame.transform.scale(random.choice(self.images), (50, 60))
+
+    def change_direction(self):
+        self.speed_x = -self.speed_x
 
     def fire_bullet(self):
         bullet = BulletEnemy(self.rect.centerx, self.rect.bottom)
