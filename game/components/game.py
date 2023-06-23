@@ -1,12 +1,12 @@
-import pygame
-
+import pygame, random
 from random import randint
-from game.utils.constants import BG, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS, DEFAULT_TYPE,FONT_STYLE
-from game.components.spaceship import spaceship
+from game.utils.constants import BG, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS, DEFAULT_TYPE, SOUND, FONT_STYLE
+from game.components.spaceship import Spaceship
+from game.components.shield import Shield
+from game.components.enemies.enemy import Enemy
+from game.components.gameover import GameOverScreen
 
-from game.enemy import enemy
 
-from game.components.gameover import GameOver
 class Game:
     def __init__(self):
         pygame.init()
@@ -18,50 +18,47 @@ class Game:
         self.game_speed = 10
         self.x_pos_bg = 0
         self.y_pos_bg = 0
-        self.spaceship = spaceship()
+        self.spaceship = Spaceship()
+        self.shield = Shield()
         self.enemies = []
-    
-        for _ in range(5):
-            enemy = enemy()
-            self.enemies.append(enemy)
-        self.game_over_screen = GameOver(self.restart_game)
+        self.generate_enemies()
+        self.sounds = SOUND
+        self.game_over_screen = GameOverScreen(self.restart_game)
         self.score = 0
         self.deaths = 0
         self.max_score = 0
         self.font = pygame.font.Font(FONT_STYLE, 40)
+        self.life = 0
 
     def run(self):
-
         self.playing = True
         while self.playing:
             self.handle_events()
             self.update()
             self.draw()
-        else:
-            print("Something ocurred to quit the game!")
         pygame.display.quit()
         pygame.quit()
 
     def handle_events(self):
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.playing = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     self.spaceship.fire_bullet()
-        
+
     def update(self):
         events = pygame.key.get_pressed()
         self.spaceship.update(events)
+        self.shield.update()
         for enemy in self.enemies:
             enemy.update()
             if randint(1, 20) == 1:
                 enemy.fire_bullet()
         self.handle_collisions()
         if not self.enemies:
-            self.spawn_enemies()
-    
+            self.generate_enemies()
+
     def handle_collisions(self):
         for bullet in self.spaceship.bullets:
             for enemy in self.enemies:
@@ -74,14 +71,23 @@ class Game:
         for enemy in self.enemies:
             for bullet in enemy.bullets:
                 if bullet.rect.colliderect(self.spaceship.rect):
-                    self.game_over()
+                    self.life -= 1
+                    if self.life <= 0:
+                        self.spaceship.normal()
+                        self.game_over()
         if pygame.sprite.spritecollide(self.spaceship, self.enemies, False):
-            self.game_over()
-        
+            self.life -= 1
+            if self.life <= 0:
+                self.spaceship.normal()
+                self.game_over()
+        if pygame.sprite.collide_rect(self.spaceship, self.shield):
+            self.life += 1
+            self.spaceship.shield_collision()
+            self.shield.kill()
 
-    def spawn_enemies(self):
+    def generate_enemies(self):
         for _ in range(5):
-            enemy = enemy()
+            enemy = Enemy()
             self.enemies.append(enemy)
 
     def game_over(self):
@@ -95,15 +101,14 @@ class Game:
 
     def restart_game(self):
         self.playing = True
-    
+
     def draw(self):
+        
         self.clock.tick(FPS)
         self.screen.fill((255, 255, 255))
-
         self.draw_background()
-  
         self.spaceship.draw(self.screen)
-
+        self.shield.draw(self.screen)
         for enemy in self.enemies:
             enemy.draw(self.screen)
         self.draw_score()
@@ -126,3 +131,8 @@ class Game:
         score_rect = score_text.get_rect()
         score_rect.topleft = (10, 10)
         self.screen.blit(score_text, score_rect)
+
+        life_text = self.font.render(f"Shield: {self.life}", True, (255, 255, 255))
+        life_rect = life_text.get_rect()
+        life_rect.topright = (self.screen.get_width() - 10, 10)
+        self.screen.blit(life_text, life_rect)
