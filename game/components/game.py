@@ -1,6 +1,6 @@
 import pygame, random
 from random import randint
-from game.utils.constants import BG, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS, DEFAULT_TYPE, SOUND, FONT_STYLE
+from game.utils.constants import BG, ICON, SCREEN_HEIGHT, SCREEN_WIDTH, TITLE, FPS, DEFAULT_TYPE, FONT_STYLE
 from game.components.spaceship import Spaceship
 from game.components.shield import Shield
 from game.components.enemies.enemy import Enemy
@@ -22,7 +22,6 @@ class Game:
         self.shield = Shield()
         self.enemies = []
         self.generate_enemies()
-        self.sounds = SOUND
         self.game_over_screen = GameOverScreen(self.restart_game)
         self.score = 0
         self.deaths = 0
@@ -65,7 +64,6 @@ class Game:
                 if bullet.rect.colliderect(enemy.rect):
                     self.spaceship.bullets.remove(bullet)
                     self.enemies.remove(enemy)
-                    self.sounds.play()
                     self.score += 100
                     self.deaths += 1
         for enemy in self.enemies:
